@@ -3,7 +3,7 @@ from random import randint
 #base subject to create population without repetitions
 baseSubject = "000001010011100101110111"
 
-#solution for test purpose
+#solution for test purposes
 solution = "100000111011001110010101"
 
 def shuffle (amount, base):
@@ -45,7 +45,13 @@ def averagePopulationFitness (population):
     fitness = fitness / (len(population) + 1)
     return fitness
 
-
-
-#x = individualFitness(baseSubject)
-#print x
+def cutAndCrossfill (parent1, parent2, cut):
+    child = parent1[:(cut*3)]
+    for i in range(0, 24, 3):
+        aux = True
+        for e in range(0, cut*3, 3):
+            if (parent2[i:(i+3)] == parent1[e:(e+3)]):
+                aux = False
+        if aux:
+            child = child + (parent2[i:(i+3)])
+    return child
