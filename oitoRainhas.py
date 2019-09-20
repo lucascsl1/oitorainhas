@@ -23,20 +23,29 @@ def initialPopulation (size, baseIndividual):
         population[i] = shuffle(200, baseSubject)
     return population
 
-def individualFitness (baseIndividual):
+def individualFitness (subject):
     colisions = 0
     for i in range(0, 7):
         ind = i*3
-        aux = baseIndividual[ind:(ind+3)]
+        aux = subject[ind:(ind+3)]
         value1 = int(bin(int(aux, 2)),2)
         for e in range((i+1), 8):
             ind2 = e * 3
-            aux2 = baseIndividual[ind2:(ind2 + 3)]
+            aux2 = subject[ind2:(ind2 + 3)]
             value2 = int(bin(int(aux2, 2)), 2)
             distance = e - i
             if ((value1 + distance) == value2) or ((value1 - distance) == value2):
                 colisions = colisions + 1
-    return(colisions)
+    return colisions
 
-x = individualFitness(baseSubject)
-print x
+def averagePopulationFitness (population):
+    fitness = 0
+    for i in range(0, len(population)):
+        fitness = fitness + (individualFitness(population[i]))
+    fitness = fitness / (len(population) + 1)
+    return fitness
+
+
+
+#x = individualFitness(baseSubject)
+#print x
