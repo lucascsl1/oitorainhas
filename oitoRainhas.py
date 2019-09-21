@@ -6,6 +6,8 @@ baseSubject = "000001010011100101110111"
 #solution for test purposes
 solution = "100000111011001110010101"
 
+test = ["000001010011100101110111", "000001010011100101110111"]
+
 def shuffle (amount, base):
     newSubject = base
     for i in range(0, amount):
@@ -55,3 +57,34 @@ def cutAndCrossfill (parent1, parent2, cut):
         if aux:
             child = child + (parent2[i:(i+3)])
     return child
+
+#picks x random subjects from a population and stores individual fitness and index
+def xRandom (population, x):
+    chosen = []
+    ind = []
+    for i in range(0, x):
+        y = randint(0, len(population))
+        if y not in ind:
+            ind = ind + [y]
+            chosen = chosen + population[y]
+    return chosen,ind
+
+def best2 (selection, indexes):
+    best = []
+    if individualFitness(selection[0]) <= individualFitness(selection[1]):
+        x = 0
+        y = 1
+    else:
+        x = 1
+        y = 0
+    for i in range(2, len(selection)):
+        if individualFitness(selection[i]) <= individualFitness(selection[x]):
+            y = x
+            x = i
+        elif individualFitness(selection[i]) <= individualFitness(selection[y]):
+            y = i
+    best = [indexes[x], indexes[y]]
+    return best
+
+def replace (population, ind, subject):
+    population[ind] = subject
