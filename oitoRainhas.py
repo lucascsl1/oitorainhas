@@ -6,8 +6,6 @@ baseSubject = "000001010011100101110111"
 #solution for test purposes
 solution = "100000111011001110010101"
 
-test = ["000001010011100101110111", "000001010011100101110111"]
-
 def shuffle (amount, base):
     newSubject = base
     for i in range(0, amount):
@@ -22,7 +20,7 @@ def shuffle (amount, base):
 def initialPopulation (size, baseIndividual):
     population = [None] * size
     for i in range(0, size):
-        population[i] = shuffle(200, baseSubject)
+        population[i] = shuffle(200, baseIndividual)
     return population
 
 def individualFitness (subject):
@@ -44,8 +42,20 @@ def averagePopulationFitness (population):
     fitness = 0
     for i in range(0, len(population)):
         fitness = fitness + (individualFitness(population[i]))
-    fitness = fitness / (len(population) + 1)
+    fitness = fitness / (len(population))
     return fitness
+
+#also returns best subject fitness
+def APFwithBestSubject (population):
+    fitness = 0
+    best = 28
+    for i in range(0, len(population)):
+        x = individualFitness(population[i])
+        if x < best:
+            best = x
+        fitness = fitness + x
+    fitness = fitness / (len(population))
+    return fitness,best
 
 def cutAndCrossfill (parent1, parent2, cut):
     child = parent1[:(cut*3)]
@@ -63,12 +73,13 @@ def xRandom (population, x):
     chosen = []
     ind = []
     for i in range(0, x):
-        y = randint(0, len(population))
+        y = randint(0, (len(population) - 1))
         if y not in ind:
             ind = ind + [y]
-            chosen = chosen + population[y]
+            chosen = chosen + [population[y]]
     return chosen,ind
 
+#choses the best 2 individuals out of the xRandom result
 def best2 (selection, indexes):
     best = []
     if individualFitness(selection[0]) <= individualFitness(selection[1]):
@@ -88,3 +99,43 @@ def best2 (selection, indexes):
 
 def replace (population, ind, subject):
     population[ind] = subject
+
+def findXWorst (population, x):
+    worst = list(range(0,x))
+    for i in range(x, len(population)):
+        for e in range(0, x):
+            if individualFitness(population[i]) > individualFitness(population[(worst[e])]):
+                worst[e] = i
+                break
+    return worst
+
+#test 1: cut and crossfill
+#parents = best 2 out of 5
+#survivors = replace worst
+#population size = 100
+#stop condition = solution or x iterations
+def test1(iterations):
+    population = initialPopulation(100, baseSubject)
+
+    for i in range(0, iterations):
+        avgFitness, bestFitness = APFwithBestSubject(population)
+
+        print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
+
+        if bestFitness == 0:
+            break
+
+        tournament, indexes = xRandom(population, 5)
+        parents = best2(tournament, indexes)
+        cut = randint(2, 5)
+        child1 = cutAndCrossfill(population[parents[0]], population[parents[1]], cut)
+        child2 = cutAndCrossfill(population[parents[1]], population[parents[0]], cut)
+        mutation = shuffle(1, population[randint(0, (len(population) -  1))])
+
+        worst = findXWorst(population, 3)
+
+        replace(population, worst[0], child1)
+        replace(population, worst[1], child2)
+        replace(population, worst[2], mutation)
+
+test1(1000)
