@@ -73,7 +73,7 @@ def valueToBitsString (value):
 def edgeRecombination (parent1, parent2):
     edges = []
     child = ""
-    for i in range(0, 7):
+    for i in range(0, 8):
         part = []
         for e in range(0, 7):
             ind = e*3
@@ -83,48 +83,67 @@ def edgeRecombination (parent1, parent2):
                 if e == 0:
                     part = part + [int(bin(int(parent1[((e + 1) * 3):(((e + 1) * 3) + 3)], 2)), 2)]
                     break
-                elif e == 1:
+                elif e == 7:
                     part = part + [int(bin(int(parent1[((e - 1) * 3):(((e - 1) * 3) + 3)], 2)), 2)]
                     break
                 else:
                     part = part + [int(bin(int(parent1[((e+1)*3):(((e+1)*3) + 3)], 2)), 2)] + [int(bin(int(parent1[((e-1)*3):(((e-1)*3) + 3)], 2)), 2)]
                     break
-            for f in range(0, 7):
-                ind2 = f * 3
-                aux2 = parent2[ind2:(ind2 + 3)]
-                value = int(bin(int(aux2, 2)), 2)
-                if value == i:
-                    if f == 0:
-                        part = part + [int(bin(int(parent2[((f + 1) * 3):(((f + 1) * 3) + 3)], 2)), 2)]
-                        break
-                    elif f == 1:
-                        part = part + [int(bin(int(parent2[((f - 1) * 3):(((f - 1) * 3) + 3)], 2)), 2)]
-                        break
-                    else:
-                        part = part + [int(bin(int(parent2[((f + 1) * 3):(((f + 1) * 3) + 3)], 2)), 2)] + [int(bin(int(parent2[((f - 1) * 3):(((f - 1) * 3) + 3)], 2)), 2)]
-                        break
+        for f in range(0, 7):
+            ind2 = f * 3
+            aux2 = parent2[ind2:(ind2 + 3)]
+            value2 = int(bin(int(aux2, 2)), 2)
+            if value2 == i:
+                if f == 0:
+                    part = part + [int(bin(int(parent2[((f + 1) * 3):(((f + 1) * 3) + 3)], 2)), 2)]
+                    break
+                elif f == 7:
+                    part = part + [int(bin(int(parent2[((f - 1) * 3):(((f - 1) * 3) + 3)], 2)), 2)]
+                    break
+                else:
+                    part = part + [int(bin(int(parent2[((f + 1) * 3):(((f + 1) * 3) + 3)], 2)), 2)] + [
+                        int(bin(int(parent2[((f - 1) * 3):(((f - 1) * 3) + 3)], 2)), 2)]
+                    break
         edges = edges + [part]
-    x = randint(0, 7)
+    x = randint(0,7)
     values = [x]
-    for g in range(0,6):
+    for g in range(0, 8):
+        previousX = x
         for h in range(0, len(edges[x])):
-
             if edges[x][h] in values:
                 pass
-            elif edges[x][h] in edges[x][h:]:
+            elif h < len(edges[x]) - 1 and edges[x].count(edges[x][h]) > 1:
                 x = edges[x][h]
+                values = values + [x]
                 break
             elif h == len(edges[x]) - 1:
                 aux = 99
-                for j in range(0, len(x)):
+                for j in range(0, len(edges[x])):
                     if edges[x][j] in values:
-                        pass
+                        if j < len(edges[x]) - 1:
+                            pass
+                        else:
+                            for l in range(0,8):
+                                if l not in values:
+                                    x = edges[x][l]
+                                    values = values + [x]
+                                    break
                     elif j == 0:
                         aux = j
-                    elif len(edges[edges[x][j]]) < aux:
+                    elif aux == 99:
+                        aux = j
+                    elif len(edges[edges[x][j]]) < len(edges[edges[x][aux]]):
                         aux = j
                 x = edges[x][aux]
                 values = values + [x]
+                break
+        if previousX == x:
+            for p in range(0,8):
+                if p not in values:
+                    x = p
+                    values = values + [x]
+                    break
+
     for k in range(0,len(values)):
         child = child + valueToBitsString(values[k])
     return child
@@ -266,3 +285,7 @@ def test2(iterations, recombinations, mutations):
 
 #for i in range(0, 10):
 #    test2(1000, 15, 20)
+
+for i in range(0, 100):
+    x = edgeRecombination(baseSubject, solution)
+    print x
