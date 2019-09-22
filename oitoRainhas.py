@@ -1,5 +1,6 @@
 from random import randint
 import math
+import matplotlib.pyplot as plt
 
 #base subject to create population without repetitions
 baseSubject = "000001010011100101110111"
@@ -63,7 +64,7 @@ def standardDeviation (values, average):
     for i in range(0, len(values)):
         x = (values[i] - average)
         sd = sd + (x * x)
-    sd = sd / len(values)
+    sd = math.sqrt(sd / (len(values) - 1))
     return sd
 
 def valueToBitsString (value):
@@ -236,10 +237,12 @@ def test1(iterations, recombinations, mutations, tournamentSize):
     population = initialPopulation(100, baseSubject)
     firstConvergence = True
     average = []
+    best = []
 
     for i in range(0, iterations):
         avgFitness, bestFitness = APFwithBestSubject(population)
         average = average + [avgFitness]
+        best = best + [bestFitness]
 
         #print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
 
@@ -259,6 +262,13 @@ def test1(iterations, recombinations, mutations, tournamentSize):
             sdAvg = standardDeviation(average, averageF)
             print ("Average fitness overall: " + str(averageF) + ", Standard deviation overall: " + str(sdAvg))
             print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
+            xAxis = range(0, len(average))
+            plt.plot(xAxis, average, color='blue')
+            plt.plot(xAxis, best, color='red')
+            plt.xlabel('Iteration')
+            plt.ylabel('Fitness')
+            plt.title('Cut-and-Crossfill, Tournament')
+            plt.show()
             break
 
         tournament, indexes = xRandom(population, tournamentSize)
@@ -289,10 +299,12 @@ def test2(iterations, recombinations, mutations):
     population = initialPopulation(100, baseSubject)
     firstConvergence = True
     average = []
+    best = []
 
     for i in range(0, iterations):
         avgFitness, bestFitness = APFwithBestSubject(population)
         average = average + [avgFitness]
+        best = best + [bestFitness]
 
         #print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
 
@@ -312,6 +324,13 @@ def test2(iterations, recombinations, mutations):
             sdAvg = standardDeviation(average, averageF)
             print ("Average fitness overall: " + str(averageF) + ", Standard deviation overall: " + str(sdAvg))
             print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
+            xAxis = range(0, len(average))
+            plt.plot(xAxis, average, color='blue')
+            plt.plot(xAxis, best, color='red')
+            plt.xlabel('Iterations')
+            plt.ylabel('Fitness')
+            plt.title('Cut-and-Crossfill, Elitist')
+            plt.show()
             break
 
         parents = findXBest(population, (recombinations * 2))
@@ -334,13 +353,15 @@ def test2(iterations, recombinations, mutations):
 
 #test 4: testing with edge recombination
 def test3(iterations, recombinations, mutations):
-    population = initialPopulation(100, baseSubject)
+    population = initialPopulation(50, baseSubject)
     firstConvergence = True
     average = []
+    best = []
 
     for i in range(0, iterations):
         avgFitness, bestFitness = APFwithBestSubject(population)
         average = average + [avgFitness]
+        best = best + [bestFitness]
 
         #print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
 
@@ -360,6 +381,13 @@ def test3(iterations, recombinations, mutations):
             sdAvg = standardDeviation(average, averageF)
             print ("Average fitness overall: " + str(averageF) + ", Standard deviation overall: " + str(sdAvg))
             print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
+            xAxis = range(0, len(average))
+            plt.plot(xAxis, average, color='blue')
+            plt.plot(xAxis, best, color='red')
+            plt.xlabel('Iterations')
+            plt.ylabel('Fitness')
+            plt.title('Edge Recombination - Elitist')
+            plt.show()
             break
 
         parents = findXBest(population, (recombinations * 2))
@@ -378,6 +406,3 @@ def test3(iterations, recombinations, mutations):
                 replace(population, worst[g], mutate[g])
             else:
                 replace(population, worst[g], childs[(g - len(mutate))])
-
-for i in range(0, 10):
-    test1(1000, 1, 1, 5)
