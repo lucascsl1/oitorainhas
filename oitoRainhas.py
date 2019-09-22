@@ -157,33 +157,11 @@ def test1(iterations):
         replace(population, worst[2], mutation)
 
 #test 2: also cut and crossfill, but picks the 2 best parents out of the whole population (elitist)
-def test2(iterations):
-    population = initialPopulation(100, baseSubject)
+#merged with test3 (run with recombinations and mutations = 1)
 
-    for i in range(0, iterations):
-        avgFitness, bestFitness = APFwithBestSubject(population)
-
-        print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
-
-        if avgFitness == 0 or i == (iterations - 1):
-            #print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
-            break
-
-        parents = findXBest(population, 2)
-        cut = randint(2, 5)
-        child1 = cutAndCrossfill(population[parents[0]], population[parents[1]], cut)
-        child2 = cutAndCrossfill(population[parents[1]], population[parents[0]], cut)
-        mutation = shuffle(1, population[randint(0, (len(population) - 1))])
-
-        worst = findXWorst(population, 3)
-
-        replace(population, worst[0], child1)
-        replace(population, worst[1], child2)
-        replace(population, worst[2], mutation)
-
-#same as test 2 but with variable number of recombinations and mutations
+#test 3: same as test 2 but with variable number of recombinations and mutations
 #note: recombinations represent the total number of parents pairs that are going to be used in the test
-def test3(iterations, recombinations, mutations):
+def test2(iterations, recombinations, mutations):
     population = initialPopulation(100, baseSubject)
 
     for i in range(0, iterations):
@@ -214,4 +192,4 @@ def test3(iterations, recombinations, mutations):
                 replace(population, worst[g], childs[(g - len(mutate))])
 
 for i in range(0, 10):
-    test3(1000, 15, 20)
+    test2(1000, 15, 20)
