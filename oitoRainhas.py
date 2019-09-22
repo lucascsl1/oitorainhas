@@ -283,9 +283,36 @@ def test2(iterations, recombinations, mutations):
             else:
                 replace(population, worst[g], childs[(g - len(mutate))])
 
-#for i in range(0, 10):
-#    test2(1000, 15, 20)
+#test 4: testing with edge recombination
+def test3(iterations, recombinations, mutations):
+    population = initialPopulation(100, baseSubject)
 
-for i in range(0, 100):
-    x = edgeRecombination(baseSubject, solution)
-    print x
+    for i in range(0, iterations):
+        avgFitness, bestFitness = APFwithBestSubject(population)
+
+        #print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
+
+        if avgFitness == 0 or i == (iterations - 1):
+            print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
+            break
+
+        parents = findXBest(population, (recombinations * 2))
+        childs = []
+        for e in range(0, len(parents), 2):
+            cut = randint(2, 5)
+            childs = childs + [edgeRecombination(population[parents[0]], population[parents[1]])]
+            childs = childs + [edgeRecombination(population[parents[1]], population[parents[0]])]
+
+        mutate = []
+        for f in range(0, mutations):
+            mutate = mutate + [shuffle(1, population[randint(0, (len(population) - 1))])]
+
+        worst = findXWorst(population, (len(mutate) + len(childs)))
+        for g in range(0, len(worst)):
+            if g <= (len(mutate) - 1):
+                replace(population, worst[g], mutate[g])
+            else:
+                replace(population, worst[g], childs[(g - len(mutate))])
+
+for i in range(0, 10):
+    test3(1000, 1, 0)
