@@ -68,6 +68,7 @@ def cutAndCrossfill (parent1, parent2, cut):
             child = child + (parent2[i:(i+3)])
     return child
 
+#xRandom and best2 must be used together
 #picks x random subjects from a population and stores individual fitness and index
 def xRandom (population, x):
     chosen = []
@@ -109,6 +110,22 @@ def findXWorst (population, x):
                 break
     return worst
 
+def findXBest (population, x):
+    best = list(range(0,x))
+    for i in range(x, len(population)):
+        for e in range(0, x):
+            if individualFitness(population[i]) < individualFitness(population[(best[e])]):
+                best[e] = i
+                break
+    return best
+
+def getSolution (population):
+    solution = ""
+    for i in range(0, len(population)):
+        if individualFitness(population[i]) == 0:
+            solution = population[i]
+    return solution
+
 #test 1: cut and crossfill
 #parents = best 2 out of 5
 #survivors = replace worst
@@ -120,9 +137,10 @@ def test1(iterations):
     for i in range(0, iterations):
         avgFitness, bestFitness = APFwithBestSubject(population)
 
-        print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
+        #print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
 
-        if bestFitness == 0:
+        if avgFitness == 0 or i == (iterations - 1):
+            print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
             break
 
         tournament, indexes = xRandom(population, 5)
@@ -138,4 +156,62 @@ def test1(iterations):
         replace(population, worst[1], child2)
         replace(population, worst[2], mutation)
 
-test1(1000)
+#test 2: also cut and crossfill, but picks the 2 best parents out of the whole population (elitist)
+def test2(iterations):
+    population = initialPopulation(100, baseSubject)
+
+    for i in range(0, iterations):
+        avgFitness, bestFitness = APFwithBestSubject(population)
+
+        print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
+
+        if avgFitness == 0 or i == (iterations - 1):
+            #print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
+            break
+
+        parents = findXBest(population, 2)
+        cut = randint(2, 5)
+        child1 = cutAndCrossfill(population[parents[0]], population[parents[1]], cut)
+        child2 = cutAndCrossfill(population[parents[1]], population[parents[0]], cut)
+        mutation = shuffle(1, population[randint(0, (len(population) - 1))])
+
+        worst = findXWorst(population, 3)
+
+        replace(population, worst[0], child1)
+        replace(population, worst[1], child2)
+        replace(population, worst[2], mutation)
+
+#same as test 2 but with variable number of recombinations and mutations
+#note: recombinations represent the total number of parents pairs that are going to be used in the test
+def test3(iterations, recombinations, mutations):
+    population = initialPopulation(100, baseSubject)
+
+    for i in range(0, iterations):
+        avgFitness, bestFitness = APFwithBestSubject(population)
+
+        #print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
+
+        if avgFitness == 0 or i == (iterations - 1):
+            print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
+            break
+
+        parents = findXBest(population, (recombinations * 2))
+        childs = []
+        for e in range(0, len(parents), 2):
+            cut = randint(2, 5)
+            childs = childs + [cutAndCrossfill(population[parents[0]], population[parents[1]], cut)]
+            childs = childs + [cutAndCrossfill(population[parents[1]], population[parents[0]], cut)]
+
+        mutate = []
+        for f in range(0, mutations):
+            mutate = mutate + [shuffle(1, population[randint(0, (len(population) - 1))])]
+
+        worst = findXWorst(population, (len(mutate) + len(childs)))
+        for g in range(0, len(worst)):
+            if g <= (len(mutate) - 1):
+                replace(population, worst[g], mutate[g])
+            else:
+                replace(population, worst[g], childs[(g - len(mutate))])
+
+for i in range(0, 10):
+    test3(1000, 15, 20)
