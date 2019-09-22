@@ -1,4 +1,5 @@
 from random import randint
+import math
 
 #base subject to create population without repetitions
 baseSubject = "000001010011100101110111"
@@ -39,7 +40,7 @@ def individualFitness (subject):
     return colisions
 
 def averagePopulationFitness (population):
-    fitness = 0
+    fitness = 0.0
     for i in range(0, len(population)):
         fitness = fitness + (individualFitness(population[i]))
     fitness = fitness / (len(population))
@@ -47,8 +48,8 @@ def averagePopulationFitness (population):
 
 #also returns best subject fitness
 def APFwithBestSubject (population):
-    fitness = 0
-    best = 28
+    fitness = 0.0
+    best = 28.0
     for i in range(0, len(population)):
         x = individualFitness(population[i])
         if x < best:
@@ -56,6 +57,14 @@ def APFwithBestSubject (population):
         fitness = fitness + x
     fitness = fitness / (len(population))
     return fitness,best
+
+def standardDeviation (values, average):
+    sd = 0.0
+    for i in range(0, len(values)):
+        x = (values[i] - average)
+        sd = sd + (x * x)
+    sd = sd / len(values)
+    return sd
 
 def valueToBitsString (value):
     switcher = {
@@ -223,30 +232,53 @@ def getSolution (population):
 #survivors = replace worst
 #population size = 100
 #stop condition = solution or x iterations
-def test1(iterations):
+def test1(iterations, recombinations, mutations, tournamentSize):
     population = initialPopulation(100, baseSubject)
+    firstConvergence = True
+    average = []
 
     for i in range(0, iterations):
         avgFitness, bestFitness = APFwithBestSubject(population)
+        average = average + [avgFitness]
 
         #print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
 
-        if avgFitness == 0 or i == (iterations - 1):
+        if bestFitness == 0.0 and firstConvergence:
+            firstConvergence = False
+            sdFitness = []
+            for k in range(0, len(population)):
+                sdFitness = sdFitness + [individualFitness(population[k])]
+            sd = standardDeviation(sdFitness, avgFitness)
+            print ("Standard deviation on first convergence: " + str(sd) + ", Average fitness: " + str(avgFitness) + ", Iteration: " + str(i))
+
+        if avgFitness == 0.0 or i == (iterations - 1):
+            averageF = 0.0
+            for p in range(0, i):
+                averageF = averageF + average[i]
+            averageF = averageF / i
+            sdAvg = standardDeviation(average, averageF)
+            print ("Average fitness overall: " + str(averageF) + ", Standard deviation overall: " + str(sdAvg))
             print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
             break
 
-        tournament, indexes = xRandom(population, 5)
-        parents = best2(tournament, indexes)
-        cut = randint(2, 5)
-        child1 = cutAndCrossfill(population[parents[0]], population[parents[1]], cut)
-        child2 = cutAndCrossfill(population[parents[1]], population[parents[0]], cut)
-        mutation = shuffle(1, population[randint(0, (len(population) -  1))])
+        tournament, indexes = xRandom(population, tournamentSize)
+        parents = findXBest(tournament, (recombinations * 2))
+        childs = []
+        for e in range(0, len(parents), 2):
+            cut = randint(2, 5)
+            childs = childs + [cutAndCrossfill(population[parents[0]], population[parents[1]], cut)]
+            childs = childs + [cutAndCrossfill(population[parents[1]], population[parents[0]], cut)]
 
-        worst = findXWorst(population, 3)
+        mutate = []
+        for f in range(0, mutations):
+            mutate = mutate + [shuffle(1, population[randint(0, (len(population) - 1))])]
 
-        replace(population, worst[0], child1)
-        replace(population, worst[1], child2)
-        replace(population, worst[2], mutation)
+        worst = findXWorst(population, (len(mutate) + len(childs)))
+        for g in range(0, len(worst)):
+            if g <= (len(mutate) - 1):
+                replace(population, worst[g], mutate[g])
+            else:
+                replace(population, worst[g], childs[(g - len(mutate))])
 
 #test 2: also cut and crossfill, but picks the 2 best parents out of the whole population (elitist)
 #merged with test3 (run with recombinations and mutations = 1)
@@ -255,13 +287,30 @@ def test1(iterations):
 #note: recombinations represent the total number of parents pairs that are going to be used in the test
 def test2(iterations, recombinations, mutations):
     population = initialPopulation(100, baseSubject)
+    firstConvergence = True
+    average = []
 
     for i in range(0, iterations):
         avgFitness, bestFitness = APFwithBestSubject(population)
+        average = average + [avgFitness]
 
         #print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
 
-        if avgFitness == 0 or i == (iterations - 1):
+        if bestFitness == 0.0 and firstConvergence:
+            firstConvergence = False
+            sdFitness = []
+            for k in range(0, len(population)):
+                sdFitness = sdFitness + [individualFitness(population[k])]
+            sd = standardDeviation(sdFitness, avgFitness)
+            print ("Standard deviation on first convergence: " + str(sd) + ", Average fitness: " + str(avgFitness) + ", Iteration: " + str(i))
+
+        if avgFitness == 0.0 or i == (iterations - 1):
+            averageF = 0.0
+            for p in range(0, i):
+                averageF = averageF + average[i]
+            averageF = averageF / i
+            sdAvg = standardDeviation(average, averageF)
+            print ("Average fitness overall: " + str(averageF) + ", Standard deviation overall: " + str(sdAvg))
             print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
             break
 
@@ -286,20 +335,36 @@ def test2(iterations, recombinations, mutations):
 #test 4: testing with edge recombination
 def test3(iterations, recombinations, mutations):
     population = initialPopulation(100, baseSubject)
+    firstConvergence = True
+    average = []
 
     for i in range(0, iterations):
         avgFitness, bestFitness = APFwithBestSubject(population)
+        average = average + [avgFitness]
 
         #print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
 
+        if bestFitness == 0.0 and firstConvergence:
+            firstConvergence = False
+            sdFitness = []
+            for k in range(0, len(population)):
+                sdFitness = sdFitness + [individualFitness(population[k])]
+            sd = standardDeviation(sdFitness, avgFitness)
+            print ("Standard deviation on first convergence: " + str(sd) + ", Average fitness: " + str(avgFitness) + ", Iteration: " + str(i))
+
         if avgFitness == 0 or i == (iterations - 1):
+            averageF = 0.0
+            for p in range(0, i):
+                averageF = averageF + average[i]
+            averageF = averageF / i
+            sdAvg = standardDeviation(average, averageF)
+            print ("Average fitness overall: " + str(averageF) + ", Standard deviation overall: " + str(sdAvg))
             print ("Iteration: " + str(i) + ", Average Fitness: " + str(avgFitness) + ", BestFitness: " + str(bestFitness) + ".")
             break
 
         parents = findXBest(population, (recombinations * 2))
         childs = []
         for e in range(0, len(parents), 2):
-            cut = randint(2, 5)
             childs = childs + [edgeRecombination(population[parents[0]], population[parents[1]])]
             childs = childs + [edgeRecombination(population[parents[1]], population[parents[0]])]
 
@@ -315,4 +380,4 @@ def test3(iterations, recombinations, mutations):
                 replace(population, worst[g], childs[(g - len(mutate))])
 
 for i in range(0, 10):
-    test3(1000, 1, 0)
+    test1(1000, 1, 1, 5)
