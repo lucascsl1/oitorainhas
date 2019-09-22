@@ -57,6 +57,42 @@ def APFwithBestSubject (population):
     fitness = fitness / (len(population))
     return fitness,best
 
+def edgeRecombination (parent1, parent2):
+    edges = []
+    for i in range(0, 7):
+        part = []
+        for e in range(0, 7):
+            ind = e*3
+            aux = parent1[ind:(ind+3)]
+            value = int(bin(int(aux, 2)),2)
+            if value == i:
+                if e == 0:
+                    part = part + [int(bin(int(parent1[((e + 1) * 3):(((e + 1) * 3) + 3)], 2)), 2)]
+                    break
+                elif e == 1:
+                    part = part + [int(bin(int(parent1[((e - 1) * 3):(((e - 1) * 3) + 3)], 2)), 2)]
+                    break
+                else:
+                    part = part + [int(bin(int(parent1[((e+1)*3):(((e+1)*3) + 3)], 2)), 2)] + [int(bin(int(parent1[((e-1)*3):(((e-1)*3) + 3)], 2)), 2)]
+                    break
+            for f in range(0, 7):
+                ind2 = f * 3
+                aux2 = parent2[ind2:(ind2 + 3)]
+                value = int(bin(int(aux2, 2)), 2)
+                if value == i:
+                    if e == 0:
+                        part = part + [int(bin(int(parent2[((e + 1) * 3):(((e + 1) * 3) + 3)], 2)), 2)]
+                        break
+                    elif e == 1:
+                        part = part + [int(bin(int(parent2[((e - 1) * 3):(((e - 1) * 3) + 3)], 2)), 2)]
+                        break
+                    else:
+                        part = part + [int(bin(int(parent2[((e + 1) * 3):(((e + 1) * 3) + 3)], 2)), 2)] + [int(bin(int(parent2[((e - 1) * 3):(((e - 1) * 3) + 3)], 2)), 2)]
+                        break
+        edges = edges + [part]
+    
+
+
 def cutAndCrossfill (parent1, parent2, cut):
     child = parent1[:(cut*3)]
     for i in range(0, 24, 3):
