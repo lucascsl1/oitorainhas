@@ -254,7 +254,7 @@ def test1(iterations, recombinations, mutations, tournamentSize):
         if avgFitness == 0.0 or i == (iterations - 1):
             averageF = 0.0
             for p in range(0, i):
-                averageF = averageF + average[i]
+                averageF = averageF + average[p]
             averageF = averageF / i
             sdAvg = standardDeviation(average, averageF)
             print ("Average fitness overall: " + str(averageF) + ", Standard deviation overall: " + str(sdAvg))
@@ -307,7 +307,7 @@ def test2(iterations, recombinations, mutations):
         if avgFitness == 0.0 or i == (iterations - 1):
             averageF = 0.0
             for p in range(0, i):
-                averageF = averageF + average[i]
+                averageF = averageF + average[p]
             averageF = averageF / i
             sdAvg = standardDeviation(average, averageF)
             print ("Average fitness overall: " + str(averageF) + ", Standard deviation overall: " + str(sdAvg))
@@ -355,7 +355,7 @@ def test3(iterations, recombinations, mutations):
         if avgFitness == 0 or i == (iterations - 1):
             averageF = 0.0
             for p in range(0, i):
-                averageF = averageF + average[i]
+                averageF = averageF + average[p]
             averageF = averageF / i
             sdAvg = standardDeviation(average, averageF)
             print ("Average fitness overall: " + str(averageF) + ", Standard deviation overall: " + str(sdAvg))
