@@ -57,8 +57,22 @@ def APFwithBestSubject (population):
     fitness = fitness / (len(population))
     return fitness,best
 
+def valueToBitsString (value):
+    switcher = {
+        0: "000",
+        1: "001",
+        2: "010",
+        3: "011",
+        4: "100",
+        5: "101",
+        6: "110",
+        7: "111"
+    }
+    return switcher.get(value, "nothing")
+
 def edgeRecombination (parent1, parent2):
     edges = []
+    child = ""
     for i in range(0, 7):
         part = []
         for e in range(0, 7):
@@ -80,17 +94,40 @@ def edgeRecombination (parent1, parent2):
                 aux2 = parent2[ind2:(ind2 + 3)]
                 value = int(bin(int(aux2, 2)), 2)
                 if value == i:
-                    if e == 0:
-                        part = part + [int(bin(int(parent2[((e + 1) * 3):(((e + 1) * 3) + 3)], 2)), 2)]
+                    if f == 0:
+                        part = part + [int(bin(int(parent2[((f + 1) * 3):(((f + 1) * 3) + 3)], 2)), 2)]
                         break
-                    elif e == 1:
-                        part = part + [int(bin(int(parent2[((e - 1) * 3):(((e - 1) * 3) + 3)], 2)), 2)]
+                    elif f == 1:
+                        part = part + [int(bin(int(parent2[((f - 1) * 3):(((f - 1) * 3) + 3)], 2)), 2)]
                         break
                     else:
-                        part = part + [int(bin(int(parent2[((e + 1) * 3):(((e + 1) * 3) + 3)], 2)), 2)] + [int(bin(int(parent2[((e - 1) * 3):(((e - 1) * 3) + 3)], 2)), 2)]
+                        part = part + [int(bin(int(parent2[((f + 1) * 3):(((f + 1) * 3) + 3)], 2)), 2)] + [int(bin(int(parent2[((f - 1) * 3):(((f - 1) * 3) + 3)], 2)), 2)]
                         break
         edges = edges + [part]
-    
+    x = randint(0, 7)
+    values = [x]
+    for g in range(0,6):
+        for h in range(0, len(edges[x])):
+
+            if edges[x][h] in values:
+                pass
+            elif edges[x][h] in edges[x][h:]:
+                x = edges[x][h]
+                break
+            elif h == len(edges[x]) - 1:
+                aux = 99
+                for j in range(0, len(x)):
+                    if edges[x][j] in values:
+                        pass
+                    elif j == 0:
+                        aux = j
+                    elif len(edges[edges[x][j]]) < aux:
+                        aux = j
+                x = edges[x][aux]
+                values = values + [x]
+    for k in range(0,len(values)):
+        child = child + valueToBitsString(values[k])
+    return child
 
 
 def cutAndCrossfill (parent1, parent2, cut):
@@ -227,5 +264,5 @@ def test2(iterations, recombinations, mutations):
             else:
                 replace(population, worst[g], childs[(g - len(mutate))])
 
-for i in range(0, 10):
-    test2(1000, 15, 20)
+#for i in range(0, 10):
+#    test2(1000, 15, 20)
