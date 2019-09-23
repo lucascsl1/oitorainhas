@@ -310,11 +310,20 @@ def test2(iterations, recombinations, mutations):
 
         if bestFitness == 0.0 and firstConvergence:
             firstConvergence = False
+            recombinations = recombinations/2
+            mutations = mutations/2
             sdFitness = []
             for k in range(0, len(population)):
                 sdFitness = sdFitness + [individualFitness(population[k])]
             sd = standardDeviation(sdFitness, avgFitness)
             print ("Standard deviation on first convergence: " + str(sd) + ", Average fitness: " + str(avgFitness) + ", Iteration: " + str(i))
+
+        if avgFitness < 2.0:
+            recombinations = 1
+            mutations = 1
+
+        if avgFitness < 1.0:
+            mutations = 0
 
         if avgFitness == 0.0 or i == (iterations - 1):
             averageF = 0.0
@@ -395,7 +404,7 @@ def test3(iterations, recombinations, mutations):
             plt.plot(xAxis, best, color='red')
             plt.xlabel('Iterations')
             plt.ylabel('Fitness')
-            plt.title('Edge Recombination - Elitista - Ajuste dinamico')
+            plt.title('Recombinacao de Bordas - Elitista - Ajuste dinamico')
             plt.show()
             break
 
